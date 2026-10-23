@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37012.4 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VolFitter", "VolFitter.vcxproj", "{6A403F8B-A300-4E59-9869-415C0D61A134}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6A403F8B-A300-4E59-9869-415C0D61A134}.Debug|x64.ActiveCfg = Debug|x64
+		{6A403F8B-A300-4E59-9869-415C0D61A134}.Debug|x64.Build.0 = Debug|x64
+		{6A403F8B-A300-4E59-9869-415C0D61A134}.Debug|x86.ActiveCfg = Debug|Win32
+		{6A403F8B-A300-4E59-9869-415C0D61A134}.Debug|x86.Build.0 = Debug|Win32
+		{6A403F8B-A300-4E59-9869-415C0D61A134}.Release|x64.ActiveCfg = Release|x64
+		{6A403F8B-A300-4E59-9869-415C0D61A134}.Release|x64.Build.0 = Release|x64
+		{6A403F8B-A300-4E59-9869-415C0D61A134}.Release|x86.ActiveCfg = Release|Win32
+		{6A403F8B-A300-4E59-9869-415C0D61A134}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {489F9CFC-0471-46B2-BB44-BC5E237A2F6C}
+	EndGlobalSection
+EndGlobal
