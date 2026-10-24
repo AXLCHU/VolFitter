@@ -29,7 +29,7 @@ void VolFitter::FitSurface(std::vector<VolSlice>& slices, FitterType type) {
 
     SVIParameters* last_svi = nullptr;
     SSVIParameters* last_ssvi = nullptr;
-
+    SVIJWParameters* last_svijw = nullptr;
 
     // 2. Iterate through each slice and execute the selected optimization
     double penalty_scaler = 40.0;
@@ -40,15 +40,28 @@ void VolFitter::FitSurface(std::vector<VolSlice>& slices, FitterType type) {
         if (type == FitterType::SVI) {
             slice.svi_p = FitSingleSliceSVI(slice);
             last_svi = &(slice.svi_p);
-            std::cout << "    [SVI Success] a=" << slice.svi_p.a << ", b=" << slice.svi_p.b
-                << ", rho=" << slice.svi_p.rho << ", m=" << slice.svi_p.m << ", sigma=" << slice.svi_p.sigma << std::endl;
+            std::cout << "    [SVI Success] a=" << slice.svi_p.a 
+                        << ", b=" << slice.svi_p.b
+                        << ", rho=" << slice.svi_p.rho 
+                        << ", m=" << slice.svi_p.m 
+                        << ", sigma=" << slice.svi_p.sigma << std::endl;
         }
-        else {
+        else if (type == FitterType::SSVI) {
             slice.ssvi_p = FitSingleSliceSSVI(slice, last_ssvi, penalty_scaler);
             last_ssvi = &(slice.ssvi_p);
             std::cout << "    [SSVI Success] theta=" << slice.ssvi_p.theta
                 << ", phi=" << slice.ssvi_p.phi << ", rho=" << slice.ssvi_p.rho << std::endl;
         }
+        else if (type == FitterType::SVI_JW) {
+            slice.svijw_p = FitSingleSliceSVIJW(slice, last_svijw, penalty_scaler);
+            last_svijw = &(slice.svijw_p);
+            std::cout << "    [SVI-JW Success] vt=" << slice.svijw_p.vt
+                    << ", psi=" << slice.svijw_p.psi 
+                    << ", p=" << slice.svijw_p.p 
+                    << ", c=" << slice.svijw_p.c 
+                    << ", vt_til=" << slice.svijw_p.vt_til << std::endl;
+        }
+
     }
 }
 
@@ -182,7 +195,7 @@ SVIParameters VolFitter::FitSingleSliceSVI(const VolSlice& slice, const SVIParam
         x0[4] = 0.05;                                     // sigma : courbure initiale
     }
 
-    // Sécurisation de x0 par rapport aux bornes au cas où prev_params flirterait avec les limites
+    // x0 bounds
     for (int i = 0; i < 5; ++i) {
         if (x0[i] < lb[i]) x0[i] = lb[i];
         if (x0[i] > ub[i]) x0[i] = ub[i];
@@ -266,7 +279,7 @@ double SsviButterflyConstraint(const std::vector<double>& params, std::vector<do
 
     double s0 = std::sqrt(4.0 - v);
 
-    return 1.0 - std::abs(s) / s0 - c / c0;
+	return std::abs(s) / s0 + c / c0 - 1.0; // <= 0 
 }
 
 SSVIParameters VolFitter::FitSingleSliceSSVI(const VolSlice& slice, const SSVIParameters* prev_params, double penalty_scaler) {
@@ -317,10 +330,7 @@ SSVIParameters VolFitter::FitSingleSliceSSVI(const VolSlice& slice, const SSVIPa
             opt.set_lower_bounds(lb);
             opt.set_upper_bounds(ub);
             opt.set_min_objective(SsviVolErrors, &args);
-
-            double v_param = theta; // atm^2 * t
-            opt.add_inequality_constraint(SsviButterflyConstraint, &v_param, 1e-8);
-
+            opt.add_inequality_constraint(SsviButterflyConstraint, &theta, 1e-8);
             opt.set_xtol_rel(1e-12);
             opt.set_maxeval(1500);
 
@@ -343,5 +353,133 @@ SSVIParameters VolFitter::FitSingleSliceSSVI(const VolSlice& slice, const SSVIPa
     out_p.theta = theta;
     out_p.rho = best_x[0];
     out_p.phi = best_x[1];
+    return out_p;
+}
+
+// ============================================================================
+// SVI-JW CALIBRATION
+// ============================================================================
+
+struct SviJwArgs {
+    const VolSlice* slice;
+    double expiry;
+    double penalty_scaler;
+    const SVIJWParameters* next_slice_params;
+};
+
+
+double SviJwVolErrors(const std::vector<double>& x, std::vector<double>& grad, void* data) {
+
+    auto* args = static_cast<SviJwArgs*>(data);
+    const VolSlice* slice = args->slice;
+
+    SVIJWParameters jw_params;
+    jw_params.vt = x[0];
+    jw_params.psi = x[1];
+    jw_params.p = x[2];
+    jw_params.c = x[3];
+    jw_params.vt_til = x[4];
+
+    SVIParameters raw = VolModels::ConvertJwToRaw(jw_params, slice->expiry);
+
+    double f = 0.0;
+
+    for (size_t i = 0; i < slice->points.size(); ++i) {
+        const auto& pt = slice->points[i];
+
+        double var_model = VolModels::SVI_Raw(pt.log_moneyness, raw);
+        double iv = pt.implied_vol;
+
+        double diff_variance = var_model - (iv * iv * slice->expiry); // Variance totale du marché
+        double error_term = (diff_variance * diff_variance) * pt.vega;
+        f += error_term;
+
+        if (args->next_slice_params != nullptr) {
+            SVIParameters raw_next = VolModels::ConvertJwToRaw(*(args->next_slice_params), slice->expiry);
+            double tvar_next_slice_i = VolModels::SVI_Raw(pt.log_moneyness, raw_next);
+            f += SsviVolPenaltyTerm(var_model, slice->expiry, tvar_next_slice_i, args->penalty_scaler) * pt.vega;
+        }
+    }
+
+    return f;
+}
+
+
+SVIJWParameters VolFitter::FitSingleSliceSVIJW(const VolSlice& slice, const SVIJWParameters* prev_params, double penalty_scaler) {
+
+    double atm_vol = VolFitter::DeduceAtmVol(slice);
+    double atm_var = atm_vol * atm_vol;
+
+    SviJwArgs args;
+    args.slice = &slice;
+    args.expiry = slice.expiry;
+    args.penalty_scaler = penalty_scaler;
+
+    if (prev_params != nullptr) {
+        args.next_slice_params = prev_params;
+    }
+    else {
+        args.next_slice_params = nullptr;
+    }
+
+    std::vector<double> xn(5);
+    if (prev_params != nullptr) {
+        xn[0] = prev_params->vt;
+        xn[1] = prev_params->psi;
+        xn[2] = prev_params->p;
+        xn[3] = prev_params->c;
+        xn[4] = prev_params->vt_til;
+    }
+    else {
+        xn[0] = atm_var;         // vt initial
+        xn[1] = 0.0;             // psi (skew ATM nul au départ)
+        xn[2] = 0.5;             // p (pente aile gauche)
+        xn[3] = 0.5;             // c (pente aile droite)
+        xn[4] = atm_var * 0.8;   // vt_til (variance minimale estimée)
+    }
+
+    std::vector<double> x0 = { atm_var, -0.05, 0.3, 0.3, atm_var * 0.85 };
+    std::vector<std::vector<double>> guesses = { xn, x0 };
+
+    std::vector<double> lb = { 1e-6, -10.0, 0.0, 0.0, 1e-6 };
+    std::vector<double> ub = { 5.0,   10.0, 5.0, 5.0, 5.0 };
+
+    std::vector<double> best_x = x0;
+    bool success = false;
+
+    std::vector<nlopt::algorithm> algorithms = { nlopt::LN_COBYLA, nlopt::LN_BOBYQA };
+
+    for (const auto& guess : guesses) {
+        for (const auto& algo : algorithms) {
+            nlopt::opt opt(algo, 5); // 5 paramètres à optimiser
+            opt.set_lower_bounds(lb);
+            opt.set_upper_bounds(ub);
+            opt.set_min_objective(SviJwVolErrors, &args);
+
+            opt.set_xtol_rel(1e-12);
+            opt.set_maxeval(1500);
+
+            std::vector<double> x = guess;
+            double minf;
+            try {
+                if (opt.optimize(x, minf) == nlopt::SUCCESS) {
+                    best_x = x;
+                    success = true;
+                    break;
+                }
+            }
+            catch (const std::exception& e) {
+            }
+        }
+        if (success) break;
+    }
+
+    SVIJWParameters out_p;
+    out_p.vt = best_x[0];
+    out_p.psi = best_x[1];
+    out_p.p = best_x[2];
+    out_p.c = best_x[3];
+    out_p.vt_til = best_x[4];
+
     return out_p;
 }

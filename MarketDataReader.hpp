@@ -19,6 +19,7 @@ struct VolSlice {
     std::vector<MarketPoint> points;
     SVIParameters svi_p;
     SSVIParameters ssvi_p;
+    SVIJWParameters svijw_p;
 };
 
 class MarketDataReader {

@@ -63,13 +63,19 @@ int main() {
     // ------------------------------------------------------------------------
 
     //FitterType selected_model = FitterType::SVI;
-    FitterType selected_model = FitterType::SSVI;
+    //FitterType selected_model = FitterType::SSVI;
+    FitterType selected_model = FitterType::SVI_JW;
 
-    if (selected_model == FitterType::SVI) {
+    switch (selected_model) {
+    case FitterType::SVI:
         std::cout << "\n[Step 2] Executing SVI Volatility Fitter..." << std::endl;
-    }
-    else {
+        break;
+    case FitterType::SSVI:
         std::cout << "\n[Step 2] Executing SSVI Volatility Fitter..." << std::endl;
+        break;
+    case FitterType::SVI_JW:
+        std::cout << "\n[Step 2] Executing SVI Jump-Wings (SVI-JW) Volatility Fitter..." << std::endl;
+        break;
     }
 
     try {

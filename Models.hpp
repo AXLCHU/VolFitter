@@ -1,9 +1,11 @@
 #pragma once
 #include <cmath>
+#include <algorithm>
 
-enum class FitterType { SVI, SSVI };
+enum class FitterType { SVI, SSVI, SVI_JW };
 
 struct SVIParameters { double a, b, rho, m, sigma; };
+struct SVIJWParameters { double vt, psi, p, c, vt_til; };
 struct SSVIParameters { double theta, phi, rho; };
 
 namespace VolModels {
@@ -16,6 +18,47 @@ namespace VolModels {
         return 0.5 * p.theta * (1.0 + p.rho * p.phi * k +
             std::sqrt((p.phi * k + p.rho) * (p.phi * k + p.rho) + (1.0 - p.rho * p.rho)));
     }*/
+
+
+    // Convert Jump-Wings in Raw SVI parameters 
+    inline SVIParameters ConvertJwToRaw(const SVIJWParameters& jw, double t) {
+        double wt = jw.vt * t;
+        if (wt < 1e-9) wt = 1e-9;
+
+        double beta = jw.p + jw.c;
+        double alpha = jw.p - jw.c;
+
+        SVIParameters raw;
+
+        raw.b = 0.5 * std::sqrt(wt) * beta;
+        raw.rho = (beta != 0.0) ? (alpha / beta) : 0.0;
+
+        if (raw.rho >= 1.0)  raw.rho = 0.999;
+        if (raw.rho <= -1.0) raw.rho = -0.999;
+
+        if (raw.b * (1.0 - raw.rho * raw.rho) == 0.0) {
+            raw.m = 0.0;
+            raw.sigma = 0.05;
+        }
+        else {
+            double denom = raw.b * std::sqrt(1.0 - raw.rho * raw.rho);
+            raw.m = (jw.vt - jw.vt_til) / (denom * t);
+
+            double g_atm = (2.0 * jw.psi * std::sqrt(wt)) / raw.b;
+            double sqrt_term = 1.0 - raw.rho * raw.rho;
+            raw.sigma = std::abs(raw.m) * std::sqrt(std::max(1.0 / (g_atm * g_atm - raw.rho * raw.rho) - 1.0, 1e-6));
+        }
+
+        raw.a = jw.vt_til * t - raw.b * raw.sigma * std::sqrt(1.0 - raw.rho * raw.rho);
+
+        return raw;
+    }
+
+    // SVI-JW tvar at k and t
+    inline double SVI_JW(double k, const SVIJWParameters& p, double t) {
+        SVIParameters raw = ConvertJwToRaw(p, t);
+        return SVI_Raw(k, raw);
+    }
 
     inline double SSVI(double k, const SSVIParameters& p) {
         
