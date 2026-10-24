@@ -96,7 +96,7 @@ int main() {
     std::vector<VolSlice> fitted_surface_data = VolSurfaceEvaluator::GenerateFittedSurface(surface_data, forward_curve, selected_model);
 
     // Output fitted vols
-    std::string output_csv = output_path + (selected_model == FitterType::SVI ? "svi_vols.csv" : "ssvi_vols.csv");
+    std::string output_csv = output_path + (selected_model == FitterType::SVI ? "svi_vols.csv" : selected_model == FitterType::SSVI ? "ssvi_vols.csv" : "svijw_vols.csv");
 
     VolSurfaceEvaluator::ExportToCSV(output_csv, fitted_surface_data);
 
