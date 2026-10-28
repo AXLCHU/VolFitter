@@ -1,9 +1,0 @@
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/pkgs/nlopt_x64-windows/lib/pkgconfig/nlopt.pc
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/pkgs/nlopt_x64-windows/include/nlopt.h
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/pkgs/nlopt_x64-windows/include/nlopt.hpp
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/pkgs/nlopt_x64-windows/lib/nlopt.lib
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/pkgs/nlopt_x64-windows/bin/nlopt.dll
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/pkgs/nlopt_x64-windows/lib/cmake/nlopt/NLoptLibraryDepends.cmake
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/pkgs/nlopt_x64-windows/lib/cmake/nlopt/NLoptLibraryDepends-release.cmake
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/pkgs/nlopt_x64-windows/lib/cmake/nlopt/NLoptConfig.cmake
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/pkgs/nlopt_x64-windows/lib/cmake/nlopt/NLoptConfigVersion.cmake
