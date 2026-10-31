@@ -1,7 +1,0 @@
-Package: nlopt
-Version: 2.10.0
-Depends: vcpkg-cmake, vcpkg-cmake-config
-Architecture: x64-windows
-Multi-Arch: same
-Abi: d59482808ccb8799d892dfc8a35a62716db4662a9f81d915652515722be436c1
-Description: Library for nonlinear local and global optimization, for functions with and without gradient information.

@@ -1,9 +1,0 @@
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/blds/nlopt/x64-windows-rel/CMakeFiles/generate-cpp.dir
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/blds/nlopt/x64-windows-rel/CMakeFiles/nlopt.dir
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/blds/nlopt/x64-windows-rel/CMakeFiles/package.dir
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/blds/nlopt/x64-windows-rel/CMakeFiles/package_source.dir
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/blds/nlopt/x64-windows-rel/CMakeFiles/edit_cache.dir
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/blds/nlopt/x64-windows-rel/CMakeFiles/rebuild_cache.dir
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/blds/nlopt/x64-windows-rel/CMakeFiles/list_install_components.dir
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/blds/nlopt/x64-windows-rel/CMakeFiles/install.dir
-C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/blds/nlopt/x64-windows-rel/CMakeFiles/install/local.dir
