@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include "MathsUtils.hpp"
 #include "Fitter.hpp"
+#include "VolCalib.hpp"
 
 // Including NLopt C++ header for COBYLA solver
 #include <nlopt.hpp>
@@ -30,6 +31,7 @@ void VolFitter::FitSurface(std::vector<VolSlice>& slices, FitterType type) {
     SVIParameters* last_svi = nullptr;
     SSVIParameters* last_ssvi = nullptr;
     SVIJWParameters* last_svijw = nullptr;
+    PowerLawWingsParameters* last_svi_wings = nullptr;
 
     // 2. Iterate through each slice and execute the selected optimization
     double penalty_scaler = 40.0;
@@ -61,7 +63,15 @@ void VolFitter::FitSurface(std::vector<VolSlice>& slices, FitterType type) {
                     << ", c=" << slice.svijw_p.c 
                     << ", vt_til=" << slice.svijw_p.vt_til << std::endl;
         }
-
+        else if (type == FitterType::SVI_wings) {
+			slice.svi_p = FitSingleSliceSVI(slice, last_svi);
+			slice.svi_wings_p = FitSingleSliceSVIWings(slice, slice.svi_p, 0.75, 0.85); ///
+            last_svi = &(slice.svi_p);
+            last_svi_wings = &(slice.svi_wings_p);
+			std::cout << "    [SVI Wings Success] K_l=" << slice.svi_wings_p.k_L 
+				<< ", K_r=" << slice.svi_wings_p.k_R
+                << std::endl;
+        }
     }
 }
 
@@ -482,4 +492,20 @@ SVIJWParameters VolFitter::FitSingleSliceSVIJW(const VolSlice& slice, const SVIJ
     out_p.vt_til = best_x[4];
 
     return out_p;
+}
+
+// ============================================================================
+// SVI Wings CALIBRATION
+// ============================================================================
+
+PowerLawWingsParameters VolFitter::FitSingleSliceSVIWings(
+    const VolSlice& slice,
+    const SVIParameters& core,
+    double gamma_L,
+    double gamma_R)
+{
+    // Newton-Raphson
+    PowerLawWingsParameters wings_p = VolModels::Calibrate_PowerLaw_Wings(core, gamma_L, gamma_R);
+
+    return wings_p;
 }

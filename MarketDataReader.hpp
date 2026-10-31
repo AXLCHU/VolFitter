@@ -20,6 +20,7 @@ struct VolSlice {
     SVIParameters svi_p;
     SSVIParameters ssvi_p;
     SVIJWParameters svijw_p;
+	PowerLawWingsParameters svi_wings_p;
 };
 
 class MarketDataReader {

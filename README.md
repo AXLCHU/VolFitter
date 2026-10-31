@@ -18,9 +18,9 @@ C++ implementation and comparison of SVI, SSVI and SVI-JW volatility models, cal
 
 ## Model testing
 
-- **SVI:** Parametric IV smile.
+- **SVI:** Parametric IV smile with 5 parameters, fit slice by slice, good fit but prone to arbitrage.
 - **SSVI:** Surface parameterisation across maturities and arbitrage-free constraints.
-- **SVI-JW:** SVI parameterisation with wings characteristics.
+- **Power-Law Wings:** Concave curvature on extrem wings, ensuring compliance with Roger Lee's moment formula.
 
 ## Benchmarks
 

@@ -1,0 +1,12 @@
+prefix=C:/Users/axelc/OneDrive/Documents/github/VolFitter/vcpkg_installed/vcpkg/pkgs/nlopt_x64-windows
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: NLopt
+Description: nonlinear optimization library
+Version: 2.10.0
+Libs: -L${libdir} -lnlopt
+Libs.private: 
+Cflags: -I${includedir}
+

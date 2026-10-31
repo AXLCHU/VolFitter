@@ -11,4 +11,10 @@ private:
     static SSVIParameters FitSingleSliceSSVI(const VolSlice& slice, const SSVIParameters* prev_params, double penalty_scaler);
     static double DeduceAtmVol(const VolSlice& slice);
     static SVIJWParameters FitSingleSliceSVIJW(const VolSlice& slice, const SVIJWParameters* prev_params, double penalty_scaler);
+    static PowerLawWingsParameters FitSingleSliceSVIWings(
+        const VolSlice& slice, 
+        const SVIParameters& current_svi_core, 
+        double gamma_L,
+        double gamma_R);
+
 };

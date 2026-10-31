@@ -23,9 +23,15 @@ class VolSurfaceEvaluator {
             if (type == FitterType::SVI) {
                 total_var = VolModels::SVI_Raw(k, slice.svi_p);
             }
-            else {
+            else if (type == FitterType::SSVI) {
                 total_var = VolModels::SSVI(k, slice.ssvi_p);
             }
+            else if (type == FitterType::SVI_JW) {
+                total_var = VolModels::SVI_Raw(k, VolModels::ConvertJwToRaw(slice.svijw_p, T));
+        }
+            else if (type == FitterType::SVI_wings) {
+                total_var = VolModels::SVI_With_PowerLawWings(k, slice.svi_wings_p);
+        }
 
             if (total_var <= 0.0) {
                 pt.total_variance = 0.0;

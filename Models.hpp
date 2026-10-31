@@ -2,16 +2,31 @@
 #include <cmath>
 #include <algorithm>
 
-enum class FitterType { SVI, SSVI, SVI_JW };
+enum class FitterType { SVI, SSVI, SVI_JW, SVI_wings };
 
 struct SVIParameters { double a, b, rho, m, sigma; };
 struct SVIJWParameters { double vt, psi, p, c, vt_til; };
 struct SSVIParameters { double theta, phi, rho; };
+struct IVPParameters { double a, b, rho, m, sigma, gamma; }; // IVP model (SVI with global power)
+
+// Power-Law Wing SVI
+struct PowerLawWingsParameters {
+    SVIParameters svi_core; 
+    double k_L, A_L, gamma_L; // Put 
+    double k_R, A_R, gamma_R; // Call 
+};
+
 
 namespace VolModels {
 
     inline double SVI_Raw(double k, const SVIParameters& p) {
         return p.a + p.b * (p.rho * (k - p.m) + std::sqrt((k - p.m) * (k - p.m) + p.sigma * p.sigma));
+    }
+
+    inline double SVI_Raw_Derivative(double k, const SVIParameters& p) {
+        double sqrt_term = std::sqrt((k - p.m) * (k - p.m) + p.sigma * p.sigma);
+        if (sqrt_term < 1e-9) sqrt_term = 1e-9;
+        return p.b * (p.rho + (k - p.m) / sqrt_term);
     }
 
 /*    inline double SSVI(double k, const SSVIParameters& p) {
@@ -75,4 +90,26 @@ namespace VolModels {
 
         return p.theta * (term1 + std::sqrt(inner_sqrt));
     }
+
+    inline double IVP_TotalVariance(double k, const IVPParameters& p) {
+        double inner = p.rho * (k - p.m) + std::sqrt((k - p.m) * (k - p.m) + p.sigma * p.sigma);
+        if (inner < 0.0) inner = 0.0; 
+        return p.a + p.b * std::pow(inner, 2.0 * p.gamma);
+    }
+
+    inline double SVI_With_PowerLawWings(double k, const PowerLawWingsParameters& p) {
+        
+        if (k < p.k_L) {
+            return p.A_L * std::pow(std::abs(k), p.gamma_L);
+        }
+        else if (k > p.k_R) {
+            return p.A_R * std::pow(std::abs(k), p.gamma_R);
+        }
+        else {
+            return SVI_Raw(k, p.svi_core);
+        }
+        //return SVI_Raw(k, p.svi_core);
+    }
+
+
 }
