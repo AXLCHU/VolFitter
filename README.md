@@ -22,7 +22,7 @@ Implementation and comparison of SVI, SSVI and Power-Law Wings volatility models
 - **SSVI:** 2-3 Parameters Surface parameterisation across maturities and arbitrage-free constraints.
 - **Power-Law Wings:** 6 Parameters Concave curvature on extrem wings, ensuring compliance with Roger Lee's moment formula.
 
-## #Arbitrage-Removal-Procedure
+## Arbitrage-Removal-Procedure
 
 To ensure a valid risk-neutral density, our pipeline enforces strict static arbitrage filters:
 
@@ -31,7 +31,7 @@ To ensure a valid risk-neutral density, our pipeline enforces strict static arbi
    * **SSVI:** Analytically bounded using θ φ(θ)(1+|ρ|) < 4.
    * **SVI & ORC:** Solved via sequential quadratic programming (SQP) that penalizes the negative regions of the density function until g(k) ≥ 0 across the defined moneyness grid.
 
-## #Results
+## Results
 
 Models are compared based on Calibration error, Convergence and parameter stability and Static-arbitrage compliance
 
