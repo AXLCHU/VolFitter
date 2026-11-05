@@ -153,8 +153,8 @@ SVIParameters VolFitter::FitSingleSliceSVI(const VolSlice& slice, const SVIParam
     nlopt::opt opt(nlopt::LN_COBYLA, 5); // LN_COBYLA, LN_BOBYQA
 
     // Parameter Bounds
-    std::vector<double> lb({ 0.0,  0.005, -0.95, -1.0,  0.001 }); // a, b, rho, m, sigma
-    std::vector<double> ub({ 0.8,  0.4,  -0.3,  1.0,  0.25 });
+    std::vector<double> lb({ 0.0,  0.001, -0.99, -2.0,  0.001 }); // a, b, rho, m, sigma
+    std::vector<double> ub({ 2.5,  2.0,  0.99,  2.0,  1.5 });
     opt.set_lower_bounds(lb);
     opt.set_upper_bounds(ub);
 
@@ -183,11 +183,11 @@ SVIParameters VolFitter::FitSingleSliceSVI(const VolSlice& slice, const SVIParam
         }
 
         // 2. On adapte x0
-        x0[0] = std::max(0.0001, min_mkt_var * 0.9); // 'a' recalibré sur le niveau actuel !
-        x0[1] = prev_params->b * 0.8;                // 'b' légèrement réduit pour anticiper des ailes plus plates
+        x0[0] = prev_params->a; // 'a' recalibré sur le niveau actuel !
+        x0[1] = prev_params->b;                // 'b' légèrement réduit pour anticiper des ailes plus plates
         x0[2] = prev_params->rho;                    // 'rho' conservé (le skew reste similaire)
         x0[3] = prev_params->m;                      // 'm' conservé
-        x0[4] = std::min(0.10, prev_params->sigma);  // 'sigma' bridé pour éviter un creux trop large
+        x0[4] = prev_params->sigma;  // 'sigma' bridé pour éviter un creux trop large
     }
     else {
         // B. C'est la toute première tranche : calcul d'un x0 heuristique basé sur le marché
@@ -506,6 +506,7 @@ PowerLawWingsParameters VolFitter::FitSingleSliceSVIWings(
 {
     // Newton-Raphson
     PowerLawWingsParameters wings_p = VolModels::Calibrate_PowerLaw_Wings(core, gamma_L, gamma_R);
+//    PowerLawWingsParameters wings_p = VolModels::Calibrate_PowerLaw_Wings_Direct(slice, slice.svi_p, gamma_L, gamma_R);
 
     return wings_p;
 }

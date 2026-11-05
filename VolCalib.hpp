@@ -69,4 +69,29 @@ namespace VolModels {
 
         return p;
     }
+
+    inline PowerLawWingsParameters Calibrate_PowerLaw_Wings_Direct(const VolSlice& slice, const SVIParameters& svi,
+        double gamma_L, double gamma_R) {
+
+        PowerLawWingsParameters p;
+        p.svi_core = svi;
+        p.gamma_L = gamma_L;
+        p.gamma_R = gamma_R;
+
+
+        p.k_L = -0.35; // Seuil Put fixe et sûr (OTM Gauche)
+        p.k_R = 0.35;  // Seuil Call fixe et sûr (OTM Droite)
+
+        double w_L = SVI_Raw(p.k_L, svi);
+        double w_R = SVI_Raw(p.k_R, svi);
+
+        if (w_L < 1e-5) w_L = 1e-4;
+        if (w_R < 1e-5) w_R = 1e-4;
+
+        p.A_L = w_L / std::pow(std::abs(p.k_L), gamma_L);
+        p.A_R = w_R / std::pow(std::abs(p.k_R), gamma_R);
+
+        return p;
+    }
+
 }

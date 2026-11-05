@@ -99,11 +99,13 @@ namespace VolModels {
 
     inline double SVI_With_PowerLawWings(double k, const PowerLawWingsParameters& p) {
         
-        if (k < p.k_L) {
-            return p.A_L * std::pow(std::abs(k), p.gamma_L);
+        double k_centered = k - p.svi_core.m;
+
+        if (k_centered < p.k_L) {
+            return p.A_L * std::pow(std::abs(k_centered), p.gamma_L);
         }
-        else if (k > p.k_R) {
-            return p.A_R * std::pow(std::abs(k), p.gamma_R);
+        else if (k_centered > p.k_R) {
+            return p.A_R * std::pow(std::abs(k_centered), p.gamma_R);
         }
         else {
             return SVI_Raw(k, p.svi_core);

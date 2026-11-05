@@ -62,10 +62,10 @@ int main() {
     // SELECTING MODEL & RUNNING OPTIMIZATION
     // ------------------------------------------------------------------------
 
-    //FitterType selected_model = FitterType::SVI;
+    FitterType selected_model = FitterType::SVI;
     //FitterType selected_model = FitterType::SSVI;
     //FitterType selected_model = FitterType::SVI_JW;
-    FitterType selected_model = FitterType::SVI_wings;
+    //FitterType selected_model = FitterType::SVI_wings;
 
     switch (selected_model) {
     case FitterType::SVI:
